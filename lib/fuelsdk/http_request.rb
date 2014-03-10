@@ -14,8 +14,8 @@ module FuelSDK
     def continue
       rsp = nil
       if more?
-       @request['options']['page'] = @results['page'].to_i + 1
-       rsp = unpack @client.rest_get(@request['url'], @request['options'])
+        @request['options']['page'] = @results['page'].to_i + 1
+        rsp = unpack @client.rest_get(@request['url'], @request['options'])
       else
         puts 'No more data'
       end
@@ -28,19 +28,19 @@ module FuelSDK
     end
 
     private
-      def unpack raw
-        @code = raw.code.to_i
-        @message = raw.message
-        @body = JSON.parse(raw.body) rescue {}
-        @results = @body
-        @more = ((@results['count'] || @results['totalCount']) > @results['page'] * @results['pageSize']) rescue false
-        @success = @message == 'OK'
-      end
+    def unpack raw
+      @code = raw.code.to_i
+      @message = raw.message
+      @body = JSON.parse(raw.body) rescue {}
+      @results = @body
+      @more = ((@results['count'] || @results['totalCount']) > @results['page'] * @results['pageSize']) rescue false
+      @success = @message == 'OK'
+    end
 
-      # by default try everything against results
-      def method_missing method, *args, &block
-        @results.send(method, *args, &block)
-      end
+    # by default try everything against results
+    def method_missing method, *args, &block
+      @results.send(method, *args, &block)
+    end
   end
 
   module HTTPRequest
@@ -56,25 +56,25 @@ module FuelSDK
 
     private
 
-      def generate_uri(url, params=nil)
-        uri = URI.parse(url)
-        uri.query = URI.encode_www_form(params) if params
-        uri
-      end
+    def generate_uri(url, params=nil)
+      uri = URI.parse(url)
+      uri.query = URI.encode_www_form(params) if params
+      uri
+    end
 
-      def request(method, url, options={})
-        uri = generate_uri url, options['params']
+    def request(method, url, options={})
+      uri = generate_uri url, options['params']
 
-        http = Net::HTTP.new(uri.host, uri.port)
-        http.use_ssl = true
+      http = Net::HTTP.new(uri.host, uri.port)
+      http.use_ssl = true
 
-        data = options['data']
-        _request = method.new uri.request_uri
-        _request.body = data.to_json if data
-        _request.content_type = options['content_type'] if options['content_type']
-        response = http.request(_request)
+      data = options['data']
+      _request = method.new uri.request_uri
+      _request.body = data.to_json if data
+      _request.content_type = options['content_type'] if options['content_type']
+      response = http.request(_request)
 
-        HTTPResponse.new(response, self, :url => url, :options => options)
-      end
+      HTTPResponse.new(response, self, :url => url, :options => options)
+    end
   end
 end

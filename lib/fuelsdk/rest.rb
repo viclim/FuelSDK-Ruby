@@ -54,33 +54,33 @@ module FuelSDK
     def rest_patch url, properties={}
       url, payload = parse_properties url, properties
       rest_request :patch, url, {'data' => payload,
-        'content_type' => 'application/json'}
+                                 'content_type' => 'application/json'}
     end
 
     def rest_post url, properties={}
       url, payload = parse_properties url, properties
       rest_request :post, url, {'data' => payload,
-        'content_type' => 'application/json'}
+                                'content_type' => 'application/json'}
     end
 
     private
-      def rest_request action, url, options={}		
-        retried = false
-        begin
-          #Try to refresh the token and if we do then we need to regenerate the header as well. 
-          self.refresh 
-          (options['params'] ||= {}).merge! 'access_token' => access_token
-          rsp = rest_client.send(action, url, options)
-          raise 'Unauthorized' if rsp.message == 'Unauthorized'
-        rescue
-          raise if retried
-          self.refresh! # ask for forgiveness not, permission
-          retried = true
-          retry
-        end
-          rsp
+    def rest_request action, url, options={}		
+      retried = false
+      begin
+        #Try to refresh the token and if we do then we need to regenerate the header as well. 
+        self.refresh 
+        (options['params'] ||= {}).merge! 'access_token' => access_token
+        rsp = rest_client.send(action, url, options)
+        raise 'Unauthorized' if rsp.message == 'Unauthorized'
       rescue
-        rsp
+        raise if retried
+        self.refresh! # ask for forgiveness not, permission
+        retried = true
+        retry
       end
+      rsp
+    rescue
+      rsp
+    end
   end
 end
